@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل فيديو مشفر</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+    <style>
+      .dplayer-controller .dplayer-comment-box {
+    display: none !important;
+}
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #162133;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #player-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+        #dplayer {
+            width: 100%;
+            height: 500px;
+            background: black;
+        }
+        .refresh-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(158, 20, 20, 0.7);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .refresh-btn:hover {
+            background: rgba(158, 20, 20, 1);
+        }
+        .refresh-icon {
+            width: 16px;
+            height: 16px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+        }
+        
+        /* تحسينات لعناصر التحكم في المشغل */
+        .dplayer-controller {
+            direction: ltr !important;
+            padding: 0 10px !important;
+        }
+        .dplayer-icons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        .dplayer-volume {
+            margin-left: 10px !important;
+        }
+        .dplayer-time {
+            margin: 0 10px !important;
+        }
+        .dplayer-setting {
+            margin-left: auto !important;
+        }
+        .dplayer-full {
+            margin-left: 10px !important;
+        }
+        .dplayer-play-icon {
+            margin: 0 !important;
+        }
+        .dplayer-full-in-icon {
+            margin-left: 10px !important;
+        }
+        
+        /* إخفاء مربع النص (edittext) الموجود بجانب الوقت */
+        .dplayer-comment-input {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .dplayer-controller {
+                flex-wrap: wrap !important;
+                padding-bottom: 10px !important;
+            }
+            .dplayer-bar-wrap {
+                order: 1 !important;
+                width: 100% !important;
+                margin-top: 5px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="player-container">
+        <button class="refresh-btn" onclick="location.reload()">
+            <svg class="refresh-icon" viewBox="0 0 24 24" fill="white">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            تحديث
+        </button>
+        <div id="dplayer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+    <script>
+        // كود الباس المضمن مباشرة في الصفحة
+        const secretPass = "aHR0cHM6Ly9zaGxzLW1hc3ItcHJvZC1kdWIuc2hhaGlkLm5ldC9vdXQvdjEvZDUwMzZjYWJmMTFlNDViZjlkMGRiNDEwY2ExMzVjMTgvaW5kZXgubTN1OA==";
+        
+        // دالة فك التشفير
+        function decodeContent(encoded) {
+            try {
+                // يمكنك تغيير خوارزمية فك التشفير حسب ما تستخدمه
+                return atob(encoded); // هذه مجرد مثال باستخدام base64
+            } catch (e) {
+                console.error("خطأ في فك التشفير:", e);
+                return null;
+            }
+        }
+
+        // تهيئة المشغل
+        function initPlayer() {
+            try {
+                // فك تشفير الرابط باستخدام كود الباس المضمن
+                const videoUrl = decodeContent(secretPass);
+                
+                if (!videoUrl) {
+                    document.getElementById('player-container').innerHTML = 
+                        '<div class="error">رابط الفيديو غير صالح</div>';
+                    return;
+                }
+                
+                const dp = new DPlayer({
+                    container: document.getElementById('dplayer'),
+                    video: {
+                        url: videoUrl,
+                        type: videoUrl.includes('.m3u8') ? 'hls' : 'normal',
+                    },
+                    autoplay: true,
+                    theme: '#9e1414',
+                    danmaku: false
+                });
+                
+                dp.on('error', () => {
+                    document.getElementById('player-container').innerHTML = 
+                        '<div class="error">حدث خطأ أثناء تشغيل الفيديو</div>';
+                });
+                
+            } catch (e) {
+                document.getElementById('player-container').innerHTML = 
+                    '<div class="error">تعذر تحميل مشغل الفيديو</div>';
+            }
+        }
+
+        // بدء التشغيل عند تحميل الصفحة
+        window.onload = initPlayer;
+    </script>
+</body>
+</html>
